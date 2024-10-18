@@ -18,7 +18,7 @@ services:
       - --experimental.plugins.rewriteHeaders.modulename=github.com/XciD/traefik-plugin-rewrite-headers
       - --experimental.plugins.rewriteHeaders.version=v0.0.3
     ports:
-      - "80:80"
+      - "8022:80"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     extra_hosts:
@@ -257,7 +257,7 @@ services:
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIMEZONE}
-      - WEBUI_PORT=8080
+      - WEBUI_PORT=8022
       - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent
     volumes:
       - ${CONFIG_ROOT:-.}/qbittorrent:/config
@@ -266,15 +266,15 @@ services:
     healthcheck:
       # Container may fail if the PIA's token expired, so mark as unhealthy when there is no internet connection
       # see: https://github.com/qdm12/gluetun/issues/641#issuecomment-933856220
-      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8080", "https://google.com" ]
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:80", "https://google.com" ]
       interval: 30s
       retries: 10
-    ports:
-      - "8080:8080"
+    # ports:
+    #    - "8022:8022"
     labels:
       - traefik.enable=true
       - traefik.http.routers.qbittorrent.rule=(Host(`${HOSTNAME}`) && PathPrefix(`/qbittorrent`))
-      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8022
       - traefik.http.routers.qbittorrent.middlewares=qbittorrent-strip-slash,qbittorrent-stripprefix
       # https://github.com/qbittorrent/qBittorrent/issues/5693#issuecomment-552146296
       - traefik.http.middlewares.qbittorrent-stripprefix.stripPrefix.prefixes=/qbittorrent
@@ -289,7 +289,7 @@ services:
       - homepage.description=Bittorrent client
       - homepage.weight=2
       - homepage.widget.type=qbittorrent
-      - homepage.widget.url=http://qbittorrent:8080
+      - homepage.widget.url=http://qbittorrent:8022
       - homepage.widget.username=${QBITTORRENT_USERNAME}
       - homepage.widget.password=${QBITTORRENT_PASSWORD}
   unpackerr:
